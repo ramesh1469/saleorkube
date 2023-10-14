@@ -1,0 +1,70 @@
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saleor-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saleor
+  template:
+    metadata:
+      labels:
+        app: saleor
+    spec:
+      containers:
+      - name: saleor-api
+        image: ghcr.io/saleor/saleor:3.17.0
+        resources:
+           requests:
+              memory: "64Mi"
+              cpu: "250m"
+           limits:
+              memory: "128Mi"
+              cpu: "500m"
+        ports:
+        - containerPort: 8000
+        stdin: true
+        tty: true
+        env:
+        - name: JAEGER_AGENT_HOST
+          value: jaeger
+        - name: DASHBOARD_URL
+          value: http://localhost:9000/
+        - name: ALLOWED_HOSTS
+          value: "localhost,api"
+        - name: DEFAULT_CHANNEL_SLUG
+          value: default-channel
+        - name: HTTP_IP_FILTER_ALLOW_LOOPBACK_IPS
+          value: "True"
+        - name: HTTP_IP_FILTER_ENABLED
+          value: "True"     
+        envFrom:
+        - configMapRef:
+            name: backend-env
+        dependsOn:
+        - name: db
+        - name: redis
+        - name: jaeger
+        volumeMounts:
+        - name: saleor-media-volume
+          mountPath: /app/media
+      volumes:
+      - name: saleor-media-volume
+        persistentVolumeClaim:
+          claimName: saleor-media-pvc 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saleor-svc
+spec:
+  selector:
+    app: saleor
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000       
+
+    
