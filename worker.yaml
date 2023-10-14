@@ -43,10 +43,6 @@ spec:
         envFrom:
         - configMapRef:
             name: backend-env
-        dependsOn:
-        - name: db
-        - name: redis
-        - name: jaeger
         volumeMounts:
         - name: saleor-media-volume
           mountPath: /app/media

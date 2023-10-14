@@ -42,7 +42,6 @@ spec:
       - name: init-script
         hostPath:
           path: /path/to/host/replica_user.sql
-  restartPolicy: Always
 
 ---
 apiVersion: v1
